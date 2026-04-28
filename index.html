@@ -1,10 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>群友逆天语录大赏 v2.0 - 处刑强化版</title>
+  <meta name="title" content="QUOTE">
+  <meta name="description" content="群u逆天语录">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://openstmc.com/">
+  <meta property="og:title" content="QUOTE">
+  <meta property="og:description" content="群u逆天语录">
+  <meta property="og:image" content="favicon/favicon.jpg">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:domain" content="openstmc.com">
+  <meta name="twitter:url" content="https://openstmc.com/">
+  <meta name="twitter:title" content="QUOTE">
+  <meta name="twitter:description" content="群u逆天语录">
+  <meta name="twitter:image" content="favicon/favicon.jpg">
+
+  <meta itemprop="name" content="QUOTE">
+  <meta itemprop="description" content="群u逆天语录">
+  <meta itemprop="image" content="favicon/favicon.jpg">
+
+  <link rel="icon" href="favicon/favicon.jpg" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon/favicon.jpg">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon/favicon.jpg">
+  <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon.jpg">
+  <link rel="icon" type="image/png" sizes="128x128" href="favicon/favicon.jpg">
+  <link rel="icon" type="image/png" sizes="196x196" href="favicon/favicon.jpg">
+  <link rel="apple-touch-icon" href="favicon/favicon.jpg" sizes="any">
+  <style>
+    body {
+      margin: 0; background: #000; color: #fff;
+      height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden;
+      perspective: 1000px;
+    }
+
+    /* 语录图片容器 */
+    #img-container {
+      width: 90vw; height: 55vh;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #333; background: #111;
+      box-shadow: 0 0 30px rgba(255,71,87,0.15);
+      position: relative; border-radius: 8px;
+      cursor: zoom-in;
+      transition: 0.3s;
+    }
+    #img-container:hover { border-color: #555; box-shadow: 0 0 40px rgba(255,71,87,0.25); }
+
+    #quote-img { max-width: 95%; max-height: 95%; object-fit: contain; transition: filter 0.3s, transform 0.3s; }
+
+    #filename-display {
+      margin-top: 15px; font-size: 0.9rem; color: #888;
+      font-style: italic; min-height: 1.2rem; text-shadow: 0 0 5px #000;
+    }
+
+    .search-box { margin-top: 15px; width: 320px; text-align: center; }
+    #search-input {
+      width: 100%; padding: 12px; background: #1a1a1a;
+      border: 1px solid #444; color: #fff; border-radius: 8px;
+      outline: none; transition: 0.3s; box-sizing: border-box;
+    }
+    #search-input:focus { border-color: #ff4757; box-shadow: 0 0 10px rgba(255,71,87,0.3); }
+    #search-count { font-size: 0.75rem; color: #555; margin-top: 6px; }
+
+    #draw-btn {
+      margin-top: 20px; padding: 15px 50px;
+      font-size: 1.1rem; font-weight: bold;
+      background: #ff4757; color: white; border: none;
+      border-radius: 50px; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255,71,87,0.4);
+      transition: 0.3s;
+    }
+    #draw-btn:hover:not(:disabled) { background: #ff6b81; transform: translateY(-2px); }
+    #draw-btn:active:not(:disabled) { transform: scale(0.95); }
+    #draw-btn:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
+    #lightbox {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000; align-items: center; justify-content: center;
+      cursor: zoom-out;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    #lightbox.active { display: flex; opacity: 1; }
+
+    #lightbox-img {
+      max-width: 90%; max-height: 90%;
+      box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+      border: 4px solid #fff;
+      border-radius: 4px;
+      transform: scale(0.8) rotateY(20deg);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #lightbox.active #lightbox-img {
+      transform: scale(1) rotateY(0deg);
+    }
+    @keyframes flash {
+      0% { filter: contrast(1) brightness(1); }
+      50% { filter: contrast(2) brightness(1.5) invert(0.1); }
+      100% { filter: contrast(1) brightness(1); }
+    }
+  </style>
 </head>
 <body>
-$END$
+
+<div id="img-container" onclick="openLightbox()">
+  <img id="quote-img" src="" alt="准备好赤石了吗？">
+</div>
+
+<div id="filename-display">正在连接档案库...</div>
+
+<div class="search-box">
+  <input type="text" id="search-input" placeholder="输入群友关键词（如：Trice我喜欢你）...">
+  <div id="search-count">等待初始化...</div>
+</div>
+
+<button id="draw-btn" onclick="draw()">抽取今日群友迷惑语录</button>
+
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="放大处刑中...">
+</div>
+
+<script>
+  let imageList = [];
+  let filteredList = [];
+
+  const imgDisplay = document.getElementById('quote-img');
+  const btn = document.getElementById('draw-btn');
+  const filenameDisplay = document.getElementById('filename-display');
+  const searchInput = document.getElementById('search-input');
+  const searchCount = document.getElementById('search-count');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+
+  // 初始化
+  async function init() {
+    try {
+      const res = await fetch('manifest.json');
+      if (!res.ok) throw new Error('网络请求失败');
+      const data = await res.json();
+      imageList = data.images;
+      filteredList = [...imageList];
+      filenameDisplay.innerText = `已就绪，共 ${data.total} 份逆天档案`;
+      updateSearchState();
+    } catch (e) {
+      filenameDisplay.innerText = "Error: 找不到 manifest.json，请先运行 node 脚本";
+    }
+  }
+
+  // 搜索过滤
+  searchInput.addEventListener('input', (e) => {
+    const keyword = e.target.value.toLowerCase().trim();
+    filteredList = imageList.filter(name => name.toLowerCase().includes(keyword));
+    updateSearchState();
+  });
+
+  function updateSearchState() {
+    searchCount.innerText = `当前范围内有 ${filteredList.length} 张图片`;
+    btn.disabled = filteredList.length === 0;
+    if(filteredList.length === 0) {
+      btn.innerText = "没搜到对应的逆天语录";
+    } else {
+      btn.innerText = searchInput.value ? "从筛选结果中抽取" : "抽取今日群友迷惑语录";
+    }
+  }
+
+  // 抽卡
+  function draw() {
+    if (filteredList.length === 0) return;
+    btn.disabled = true;
+    btn.innerText = "正在窥探石山...";
+    imgDisplay.classList.add('glitch');
+    imgDisplay.style.filter = 'blur(15px) grayscale(1)';
+
+    setTimeout(() => {
+      const randomName = filteredList[Math.floor(Math.random() * filteredList.length)];
+      imgDisplay.src = `images/${randomName}`;
+      const pureName = randomName.substring(0, randomName.lastIndexOf('.')) || randomName;
+      filenameDisplay.innerText = `档案编号：${pureName}`;
+
+      imgDisplay.classList.remove('glitch');
+      imgDisplay.style.filter = 'none';
+      btn.disabled = false;
+      btn.innerText = searchInput.value ? "再抽一张(已筛选)" : "再抽一张";
+    }, 500);
+  }
+
+  function openLightbox() {
+    // 如果还没加载图片，就不放大
+    if(!imgDisplay.src || imgDisplay.src.endsWith('/')) return;
+
+    // 把当前显示的图片 src 传给灯箱
+    lightboxImg.src = imgDisplay.src;
+    lightbox.classList.add('active');
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+  }
+
+  init();
+</script>
 </body>
 </html>
