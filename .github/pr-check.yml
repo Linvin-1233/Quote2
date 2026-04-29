@@ -1,0 +1,18 @@
+name: "PR Check"
+on:
+  pull_request:
+    paths: ['images/**']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Filenames
+        run: |
+          INVALID='[\\/:*?"<>|]'
+          for f in $(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^images/'); do
+            name=$(basename "$f")
+            if [[ "$name" =~ $INVALID ]]; then
+              echo "[Error] '$name' contains invalid characters!" && exit 1
+            fi
+          done

@@ -1,0 +1,20 @@
+name: "Auto Build"
+on:
+  push:
+    branches: [main]
+    paths: ['images/**']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node build.js
+      - name: Push
+        run: |
+          git config --global user.name "Bot"
+          git config --global user.email "bot@github.com"
+          git add manifest.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "update index" && git push)
