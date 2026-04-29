@@ -2,17 +2,33 @@ name: "PR Check"
 on:
   pull_request:
     paths: ['images/**']
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Check Filenames
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史，否则无法对比差异
+
+      - name: 检查文件名
         run: |
+          BASE_BRANCH="origin/${{ github.base_ref }}"
           INVALID='[\\/:*?"<>|]'
-          for f in $(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^images/'); do
+          
+          FILES=$(git diff --name-only $BASE_BRANCH...HEAD | grep '^images/' || true)
+          
+          if [ -z "$FILES" ]; then
+            echo "没有发现 images/ 目录下的变更。"
+            exit 0
+          fi
+
+          for f in $FILES; do
             name=$(basename "$f")
             if [[ "$name" =~ $INVALID ]]; then
-              echo "[Error] '$name' contains invalid characters!" && exit 1
+              echo "[Error] 规范错误: '$name' 包含 Windows 禁用字符 (\ / : * ? \" < > |)"
+              exit 1
             fi
+            echo "[log] '$name' 符合规范"
           done
