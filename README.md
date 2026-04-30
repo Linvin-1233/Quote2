@@ -4,7 +4,7 @@
 ---
 
 # 访问方式
-- 滚木
+- https://quote.linvin.net
 - 滚木
 
 ---
